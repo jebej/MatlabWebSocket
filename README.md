@@ -41,7 +41,7 @@ to start the server on port 30000.
 
 To test the server, open the `client.html` in the `/client/` folder in a modern web browser (really anything released after 2013). The port should already be set to 30000.
 
-You can now connect and send messages. If the server is working properly, you should will receive messages identical to the ones you send.
+You can now connect and send messages. If the server is working properly, you will receive messages identical to the ones you send.
 
 To close the server, go back to Matlab and type:
 ```matlab
