@@ -1,7 +1,7 @@
 MatlabWebSocketServer
 ===============
 
-MatlabWebSocketServer is a simple websocket server for Matlab built on [Java-WebSockets](https://github.com/TooTallNate/Java-WebSocket), a java implementation of the websocket protocol by Nathan Rajlich.
+MatlabWebSocketServer is a simple websocket server for Matlab built on [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket), a java implementation of the websocket protocol by Nathan Rajlich.
 
 Installation
 ------------
@@ -22,7 +22,9 @@ The `webSocketServerLab.m` file is an abstract Matlab class. The behaviour of th
 ```
 
 `obj` is the object instance of the subclass, it is implicitly passed by Matlab.
+
 `message` is the message received by the server.
+
 `conn` is a java object representing the client connection that cause the event. For example, if a message is received, the `conn` object will represent the client that sent the message.
 
 See the `echoServer.m` file for an implementation example.
@@ -37,7 +39,11 @@ Run the echo server by making sure that the file is on the Matlab path and execu
 ```
 to start the server on port 30000.
 
-To close the server, type:
+To test the server, open the `client.html` in the `/client/` folder in a modern web browser (really anything released after 2013). The port should already be set to 30000.
+
+You can now connect and send messages. If the server is working properly, you should will receive messages identical to the ones you send.
+
+To close the server, go back to Matlab and type:
 ```matlab
         delete(obj);
 		clear obj;
@@ -48,10 +54,13 @@ Acknowledgments
 
 This work was inspired by a websocket client matlab implementation [matlab-websockets](https://github.com/mingot/matlab-websockets).
 
-It relies on the [Java-WebSockets](https://github.com/TooTallNate/Java-WebSocket) library.
+It relies on the [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) library.
 
+The html client was taken from the [cwebsocket]https://github.com/m8rge/cwebsocket repository.
 
 License
 -------
 
-The code in this repository is licensed under the MIT license. See the `LICENSE` file for details.
+Apart from the client, the code in this repository is licensed under the MIT license. See the `LICENSE` file for details.
+
+The client is licensed under the GPLv3 license. See the `CLIENTLICENSE` file in the `/client/` folder for details.
