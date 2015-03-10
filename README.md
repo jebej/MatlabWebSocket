@@ -7,7 +7,10 @@ Installation
 ------------
 The required java library `matlabwebsocketserver.jar` located in `/dist/` must be placed on the static java class path in Matlab. See the [Matlab Documentation](http://www.mathworks.com/help/matlab/matlab_external/bringing-java-classes-and-methods-into-matlab-workspace.html).
 
-You must also add the `webSocketServerLab.m` file to the Matlab path.
+You must also add the `webSocketServerLab.m` located in `/matlab/` file to the Matlab path.
+
+Usage
+------------
 
 The `webSocketServerLab.m` file is an abstract Matlab class. The behaviour of the server must therefore be defined by creating a subclass that implements the following methods:
 
@@ -15,8 +18,14 @@ The `webSocketServerLab.m` file is an abstract Matlab class. The behaviour of th
         onOpen(obj,message,conn)
         onMessage(obj,message,conn)
         onError(obj,message,conn)
-        onClose((obj,message,conn)
+        onClose(obj,message,conn)
 ```
+
+`obj` is the object instance of the subclass, it is implicitly passed by Matlab.
+`message` is the message received by the server.
+`conn` is a java object representing the client connection that cause the event. For example, if a message is received, the `conn` object will represent the client that sent the message.
+
+See the `echoServer.m` file for an implementation example.
 
 Example
 ------
