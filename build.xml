@@ -1,0 +1,22 @@
+<project default="all">
+
+	<target name="all" depends="jar" />
+
+	<target name="compile">
+		<mkdir dir="build/classes" />
+		<javac includeantruntime="false" debug="on" srcdir="java"
+			destdir="build/classes" target="1.7" source="1.7" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="dist/matlabwebsocketserver.jar">
+			<fileset dir="build/classes" includes="**/*.class" />
+		</jar>
+	</target>
+
+
+	<target name="clean">
+		<delete dir="build" />
+	</target>
+
+</project>
