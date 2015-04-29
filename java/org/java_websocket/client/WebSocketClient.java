@@ -369,7 +369,7 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 	/**
 	 * Accepts bound and unbound sockets.<br>
 	 * This method must be called before <code>connect</code>.
-	 * If the given socket is not yet bound it will be bound to the uri specified in the constructor.
+	 * If the given socket is not yet bou()nd it will be bound to the uri specified in the constructor.
 	 **/
 	public void setSocket( Socket socket ) {
 		if( this.socket != null ) {

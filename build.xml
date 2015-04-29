@@ -1,6 +1,6 @@
 <project default="all">
 
-	<target name="all" depends="jar" />
+	<target name="all" depends="clean" />
 
 	<target name="compile">
 		<mkdir dir="build/classes" />
@@ -9,14 +9,15 @@
 	</target>
 
 	<target name="jar" depends="compile">
-		<jar destfile="dist/matlabwebsocketserver.jar">
+		<jar destfile="dist/matlabwebsocket.jar">
 			<fileset dir="build/classes" includes="**/*.class" />
 		</jar>
 	</target>
 
 
-	<target name="clean">
+	<target name="clean" depends="jar">
 		<delete dir="build" />
+		<delete dir="bin" />
 	</target>
 
 </project>

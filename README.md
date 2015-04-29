@@ -1,18 +1,18 @@
-MatlabWebSocketServer
+MatlabWebSocket
 ===============
 
-MatlabWebSocketServer is a simple websocket server for Matlab built on [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket), a java implementation of the websocket protocol by Nathan Rajlich.
+MatlabWebSocket is a simple library consisting of a websocket server and client for Matlab built on [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket), a java implementation of the websocket protocol by Nathan Rajlich. It currently does not support encryption.
 
 Installation
 ------------
-The required java library `matlabwebsocketserver.jar` located in `/dist/` must be placed on the static java class path in Matlab. See the [Matlab Documentation](http://www.mathworks.com/help/matlab/matlab_external/bringing-java-classes-and-methods-into-matlab-workspace.html).
+The required java library `matlabwebsocket.jar` located in `/dist/` must be placed on the static java class path in Matlab. See the [Matlab Documentation](http://www.mathworks.com/help/matlab/matlab_external/bringing-java-classes-and-methods-into-matlab-workspace.html).
 
-You must also add the `webSocketServerLab.m` located in `/matlab/` file to the Matlab path.
+You must also add the `webSocketServer.m` and/or `webSocketClient.m` files located in `/matlab/` file to the Matlab path.
 
 Usage
 ------------
 
-The `webSocketServerLab.m` file is an abstract Matlab class. The behaviour of the server must therefore be defined by creating a subclass that implements the following methods:
+The `webSocketServer.m` file is an abstract Matlab class. The behaviour of the server must therefore be defined by creating a subclass that implements the following methods:
 
 ```matlab
         onOpen(obj,message,conn)

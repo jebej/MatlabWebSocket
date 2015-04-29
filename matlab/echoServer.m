@@ -1,4 +1,4 @@
-classdef echoServer < webSocketServerLab
+classdef echoServer < matWebSocketServer
     %ECHOSERVER Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -8,7 +8,7 @@ classdef echoServer < webSocketServerLab
     methods
         function obj = echoServer(port)
             %Constructor
-            obj@webSocketServerLab(port);
+            obj@matWebSocketServer(port);
         end
     end
     
