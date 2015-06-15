@@ -1,10 +1,12 @@
 package org.java_websocket.matlabbridge;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -35,7 +37,7 @@ public class MatlabWebSocketClientBridge extends WebSocketClient {
 	}
 
 	/** 
-	 * This function gets executed on message receipt
+	 * This function gets executed on string message receipt
 	 */
 	@Override
 	public void onMessage(String message) {
@@ -45,6 +47,22 @@ public class MatlabWebSocketClientBridge extends WebSocketClient {
 			( (MatlabListener) listeners.next() ).onMessage( matlab_event );
 		}
 	}
+
+
+	/**
+	 * Method handler when a byte message has been received from the client, including matlab java callback.
+	 */
+	@Override
+	public void onMessage( ByteBuffer blob) {
+		//System.out.println("Received: " + message);
+
+		MatlabEvent matlab_event = new MatlabEvent( this, blob);
+		Iterator<MatlabListener> listeners = _listeners.iterator();
+		while (listeners.hasNext() ) {
+			( (MatlabListener) listeners.next() ).onMessage( matlab_event );
+		}
+	}
+
 
 	/** 
 	 * This function gets executed when the websocket connection is closed. The close codes are documented in class org.java_websocket.framing.CloseFrame
@@ -107,9 +125,14 @@ public class MatlabWebSocketClientBridge extends WebSocketClient {
 	public class MatlabEvent extends java.util.EventObject {
 		private static final long serialVersionUID = 1822498536266601113L;
 		public String message;
+		public ByteBuffer blob;
 		public MatlabEvent( Object obj, String message) {
 			super( obj );
 			this.message = message;
+		}
+		public MatlabEvent( Object obj, ByteBuffer blob) {
+			super( obj );
+			this.blob = blob;
 		}
 	}
 }

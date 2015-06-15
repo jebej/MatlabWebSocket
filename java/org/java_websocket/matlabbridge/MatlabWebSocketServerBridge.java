@@ -1,6 +1,7 @@
 package org.java_websocket.matlabbridge;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -68,13 +69,28 @@ public class MatlabWebSocketServerBridge extends WebSocketServer {
 	}
 
 	/**
-	 * Method handler when a message has been received from the client, including matlab java callback.
+	 * Method handler when a string message has been received from the client, including matlab java callback.
 	 */
 	@Override
 	public void onMessage(WebSocket conn, String message) {
 		//System.out.println("Received: " + message);
 
 		MatlabEvent matlab_event = new MatlabEvent( this, message, conn, conns);
+		Iterator<MatlabListener> listeners = _listeners.iterator();
+		while (listeners.hasNext() ) {
+			( (MatlabListener) listeners.next() ).onMessage( matlab_event );
+		}
+	}
+
+
+	/**
+	 * Method handler when a byte message has been received from the client, including matlab java callback.
+	 */
+	@Override
+	public void onMessage(WebSocket conn, ByteBuffer blob) {
+		//System.out.println("Received: " + message);
+
+		MatlabEvent matlab_event = new MatlabEvent( this, blob, conn, conns);
 		Iterator<MatlabListener> listeners = _listeners.iterator();
 		while (listeners.hasNext() ) {
 			( (MatlabListener) listeners.next() ).onMessage( matlab_event );
@@ -127,11 +143,19 @@ public class MatlabWebSocketServerBridge extends WebSocketServer {
 	public class MatlabEvent extends java.util.EventObject {
 		private static final long serialVersionUID = -4346315089398115565L;
 		public String message;
+		public ByteBuffer blob;
 		public WebSocket conn;
 		public Set<WebSocket> conns;
 		public MatlabEvent( Object obj, String message, WebSocket conn, Set<WebSocket> conns) {
 			super( obj );
 			this.message = message;
+			this.conn = conn;
+			this.conns = conns;
+		}
+		
+		public MatlabEvent( Object obj, ByteBuffer blob, WebSocket conn, Set<WebSocket> conns) {
+			super( obj );
+			this.blob = blob;
 			this.conn = conn;
 			this.conns = conns;
 		}

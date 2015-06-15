@@ -21,6 +21,7 @@ classdef matWebSocketClient < handle
     
     methods
         function obj = matWebSocketClient(URI)
+            % URI in the form 'ws://localhost:30000'
             % Constructor
             obj.URI=URI;
             % Connect the client to the server
@@ -75,7 +76,7 @@ classdef matWebSocketClient < handle
             % error due to missing objects
             set(obj.client, 'OnCloseCallback', '');
             % Closes the websocket if it's open.
-            if strcmp(obj.client.getReadyState(),'OPEN')
+            if obj.status==1
                 obj.close();
             end
         end
@@ -107,7 +108,14 @@ classdef matWebSocketClient < handle
         
         function message_callback(obj, ~, e)
             % This function gets executed on a message event
-            thismessage = char(e.message); e=[]; clear e;
+            if ~isempty(e.blob) % Received bytes message
+                thismessage = typecast(e.blob.array,'uint8');
+            elseif ~isempty(e.message) % Received string message
+                thismessage = char(e.message);
+            else
+                thismessage = [];
+            end            
+            e=[]; clear e;
             % Update the properties of the client with new info
             obj.localLogAppend(thismessage,'received');
             % Define behavior here
@@ -143,7 +151,9 @@ classdef matWebSocketClient < handle
     methods (Access = protected)
         function localLogAppend(obj,message,sentReceived)
             % This function keeps a log of client event
-            if ~isa(message,'cell')
+            if isa(message,'uint8')
+                message = cellstr('Binary data message');
+            elseif ~isa(message,'cell')
                 message = cellstr(message);
             end
             time = cellstr(datestr(now));

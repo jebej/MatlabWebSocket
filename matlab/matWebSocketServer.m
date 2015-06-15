@@ -128,7 +128,14 @@ classdef matWebSocketServer < handle
         function [thisconn, thisconns, thismessage] = javaCleanup(~,e)
             % We wrap everything in handles
             thisconn=handle(e.conn);thisconns=handle(e.conns);
-            thismessage = char(e.message);e=[];clear e;
+            if ~isempty(e.blob) % Received bytes message
+                thismessage = typecast(e.blob.array,'uint8');
+            elseif ~isempty(e.message) % Received string message
+                thismessage = char(e.message);
+            else
+                thismessage = [];
+            end            
+            e=[]; clear e;
         end
     end
     
