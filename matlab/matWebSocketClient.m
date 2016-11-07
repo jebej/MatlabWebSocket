@@ -1,6 +1,7 @@
 classdef matWebSocketClient < handle
-    %MATWEBSOCKETCLIENT matWebSocketClient is an ABSTRAT class that allows matlab to
-    %start a java-websocket client instance.
+    %MATWEBSOCKETCLIENT matWebSocketClient is an ABSTRACT class that 
+    % allows MATLAB to start a java-websocket client instance.
+    %
     %   In order to make a valid implementation of the class, some methods
     %   must be defined in the superclass:
     %    onOpen(obj,message,conn)
@@ -12,12 +13,16 @@ classdef matWebSocketClient < handle
     %   client event, these actions must be performed outside of the
     %   client superclass.
     
-    properties% (SetAccess = protected) % properties can only be Set by class and subclass methods (Get is still public)
-        client % Java-WebSocket client object
+    properties (SetAccess = private) % properties can only be Set by class and subclass methods (Get is still public)
         URI % The URI of the server
         status % 0 means the client is not connected to the server
         log % Client log
     end
+    
+    properties (Access = private, Hidden)
+        client % Java-WebSocket client object
+    end
+    
     
     methods
         function obj = matWebSocketClient(URI)
@@ -30,7 +35,7 @@ classdef matWebSocketClient < handle
         
         
         function send(obj, message)
-            % Sends the message to the client specified by conn
+            % Sends the message to the server
             try
                 obj.client.send(message);
                 pause(0.005); % Small pause for the java method
@@ -47,23 +52,28 @@ classdef matWebSocketClient < handle
             % Create the java client object in with specified URI
             javaURI = javaObject('java.net.URI',obj.URI);
             javaObj = javaObject('org.java_websocket.matlabbridge.MatlabWebSocketClientBridge',javaURI);
-            % Assing the java object to a handle to avoid memory leaks
+            % Wrap the java object in a handle to avoid memory leaks
             obj.client = handle(javaObj,'CallbackProperties');
-            % Explicitely delete the reference to the raw java object
+            % Explicitely delete the reference to the "raw" java object
             javaObj = [];clear javaObj;
             % Set callbacks
-            set(obj.client, 'OnOpenCallback', @(h,e) obj.open_callback(h,e));
-            set(obj.client, 'OnMessageCallback', @(h,e) obj.message_callback(h,e));
-            set(obj.client, 'OnErrorCallback', @(h,e) obj.error_callback(h,e));
-            set(obj.client, 'OnCloseCallback', @(h,e) obj.close_callback(h,e));
+            set(obj.client,'OnOpenCallback',@(h,e) obj.open_callback(h,e));
+            set(obj.client,'OnMessageCallback',@(h,e) obj.message_callback(h,e));
+            set(obj.client,'OnErrorCallback',@(h,e) obj.error_callback(h,e));
+            set(obj.client,'OnCloseCallback',@(h,e) obj.close_callback(h,e));
             % Connect to the websocket server
             obj.status = obj.client.connectBlocking();
         end
         
         
         function close(obj)
-            % Close the websocket connection and explicitely delete the client object
+            % Close the websocket connection and explicitely delete the 
+            % java client object
+            % Remove the onclosecallback that would otherwise produce an
+            % error due to missing objects
+            set(obj.client,'OnCloseCallback','');
             obj.client.close()
+            delete(obj.client);
             obj.client = [];
             clear obj.client;
             obj.status = 0;
@@ -72,9 +82,6 @@ classdef matWebSocketClient < handle
         
         function delete(obj)
             % Destructor
-            % Remove the onclosecallback that would otherwise produce an
-            % error due to missing objects
-            set(obj.client, 'OnCloseCallback', '');
             % Closes the websocket if it's open.
             if obj.status==1
                 obj.close();
