@@ -71,12 +71,16 @@ classdef matWebSocketClient < handle
             % java client object
             % Remove the onclosecallback that would otherwise produce an
             % error due to missing objects
-            set(obj.client,'OnCloseCallback','');
-            obj.client.close()
-            delete(obj.client);
-            obj.client = [];
-            clear obj.client;
-            obj.status = 0;
+            if obj.status
+                set(obj.client,'OnCloseCallback','');
+                obj.client.close()
+                delete(obj.client);
+                obj.client = [];
+                clear obj.client;
+                obj.status = 0;
+            else
+                error('Client is not connected to the server, try to connect!');
+            end
         end
         
         
