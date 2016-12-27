@@ -65,8 +65,8 @@ classdef WebSocketServer < handle
             if obj.Status; error('The server is already running'); end
             % Create the java server object in with specified port
             if obj.Secure
-                import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLServer;
-                obj.ServerObj = handle(MatlabWebSocketSSLServer(obj.Port,obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
+                %import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLServer;
+                %obj.ServerObj = handle(MatlabWebSocketSSLServer(obj.Port,obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
             else
                 import io.github.jebej.matlabwebsocket.MatlabWebSocketServer;
                 obj.ServerObj = handle(MatlabWebSocketServer(obj.Port),'CallbackProperties');
