@@ -11,7 +11,7 @@
     <url>https://github.com/jebej/MatlabWebSocket</url>
 
     <properties>
-        <jetty.version>9.2.20.v20161216</jetty.version>
+        <nanohttpd.version>2.3.1</nanohttpd.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -49,19 +49,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-api</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-server</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-client</artifactId>
-            <version>${jetty.version}</version>
+            <groupId>org.nanohttpd</groupId>
+            <artifactId>nanohttpd-websocket</artifactId>
+            <version>${nanohttpd.version}</version>
         </dependency>
     </dependencies>
 </project>

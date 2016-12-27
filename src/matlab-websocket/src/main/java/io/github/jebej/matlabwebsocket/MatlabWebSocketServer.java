@@ -1,44 +1,38 @@
 package io.github.jebej.matlabwebsocket;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import java.io.IOException;
 
 public class MatlabWebSocketServer {
     // Store the Jetty Server object
-    private Server server;
+    private DebugWebSocketServer server;
 
     // The constructor creates a new MatlabWebSocketServer with the wildcard IP,
     // accepting all connections on the specified port
     public MatlabWebSocketServer( int port ) {
-        this.server = new Server(port);
-
-        // Setup the basic application "context" for this application at "/"
-        // This is also known as the handler tree (in jetty speak)
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
-        server.setHandler(context);
-
-        // Add websocket servlet to root path
-        ServletHolder wsHolder = new ServletHolder("MATLAB", MatlabServlet.class );
-        context.addServlet(wsHolder,"/");
+        this.server = new DebugWebSocketServer(port, true);
     }
 
     // Start server method
-    public void start() {
-        try {
-            this.server.start();
-            this.server.dump( System.err );
-            this.server.join();
-        }
-        catch (Exception e) {
-            e.printStackTrace( System.err );
-        }
+    public void start() throws IOException {
+        this.server.start();
     }
 
-    public static void main(String[] args) {
+    // Start server method
+    public void stop() {
+        this.server.stop();
+    }
+
+    public static void main(String[] args) throws IOException {
         MatlabWebSocketServer ms = new MatlabWebSocketServer(30000);
         ms.start();
+
+        System.out.println("Server started, hit Enter to stop.\n");
+        try {
+            System.in.read();
+        } catch (IOException ignored) {
+        }
+
+        ms.stop();
+        System.out.println("Server stopped.\n");
     }
 }
