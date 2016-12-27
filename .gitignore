@@ -1,6 +1,3 @@
-.classpath
-.project
-bin
-build
-example
-/bin/
+
+keystore.jks
+src\matlab-websocket\target

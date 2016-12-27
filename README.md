@@ -56,11 +56,7 @@ This work was inspired by a websocket client matlab implementation [matlab-webso
 
 It relies on the [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) library.
 
-The html client was taken from the [cwebsocket]https://github.com/m8rge/cwebsocket repository.
-
 License
 -------
 
 Apart from the client, the code in this repository is licensed under the MIT license. See the `LICENSE` file for details.
-
-The client is licensed under the GPLv3 license. See the `CLIENTLICENSE` file in the `/client/` folder for details.
