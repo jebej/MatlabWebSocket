@@ -1,38 +1,84 @@
 package io.github.jebej.matlabwebsocket;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-public class MatlabWebSocketServer {
-    // Store the Jetty Server object
-    private DebugWebSocketServer server;
+import fi.iki.elonen.NanoWSD;
+import fi.iki.elonen.NanoWSD.WebSocketFrame.CloseCode;
 
+public class MatlabWebSocketServer extends NanoWSD {
+    // To debug or not to debug
+    private final boolean debug;
     // The constructor creates a new MatlabWebSocketServer with the wildcard IP,
     // accepting all connections on the specified port
     public MatlabWebSocketServer( int port ) {
-        this.server = new DebugWebSocketServer(port, true);
+        super( port );
+        this.debug = true;
     }
 
-    // Start server method
-    public void start() throws IOException {
-        this.server.start();
+    @Override
+    public WebSocket openWebSocket( IHTTPSession handshake ) {
+        return new MatlabSocket( this, handshake );
     }
 
-    // Start server method
-    public void stop() {
-        this.server.stop();
-    }
+    // The following private class defines the interaction with MATLAB
+    public class MatlabSocket extends WebSocket {
+        public final MatlabWebSocketServer server;
 
-    public static void main(String[] args) throws IOException {
-        MatlabWebSocketServer ms = new MatlabWebSocketServer(30000);
-        ms.start();
-
-        System.out.println("Server started, hit Enter to stop.\n");
-        try {
-            System.in.read();
-        } catch (IOException ignored) {
+        public MatlabSocket( MatlabWebSocketServer server, IHTTPSession handshakeRequest ) {
+            super(handshakeRequest);
+            this.server = server;
         }
 
-        ms.stop();
-        System.out.println("Server stopped.\n");
+        @Override
+        public void onOpen() {
+            //String add = this.getRemoteAddress().getHostName() + ":" + conn.getRemoteAddress().getPort();
+            //String openMessage = "Client " + this.getRemoteAddress().hashCode() + " at " + add + " opened a connection";
+            MatlabEvent matlab_event = new MatlabEvent( server, this, "hiiiii!" );
+            Iterator<MatlabListener> listeners = _listeners.iterator();
+            while (listeners.hasNext() ) {
+                ( (MatlabListener) listeners.next() ).Open( matlab_event );
+            }
+        }
+
+        @Override
+        protected void onMessage(WebSocketFrame message) {
+            try {
+                message.setUnmasked();
+                sendFrame(message);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void onException(IOException exception) {
+        }
+
+        @Override
+        protected void onClose(CloseCode code, String reason, boolean initiatedByRemote) {
+            if (server.debug) {
+                System.out.println("C [" + (initiatedByRemote ? "Remote" : "Self") + "] " + (code != null ? code : "UnknownCloseCode[" + code + "]")
+                + (reason != null && !reason.isEmpty() ? ": " + reason : ""));
+            }
+        }
+
+        @Override
+        protected void onPong(WebSocketFrame pong) {
+            if (server.debug) {
+                System.out.println("P " + pong);
+            }
+        }
+    }
+
+    // Methods for handling MATLAB as a listener, automatically managed
+    public List<MatlabListener> _listeners = new ArrayList<MatlabListener>();
+    public synchronized void addMatlabListener( MatlabListener lis ) {
+        _listeners.add( lis );
+    }
+    public synchronized void removeMatlabListener( MatlabListener lis ) {
+        _listeners.remove( lis );
     }
 }
