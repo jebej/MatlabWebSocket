@@ -17,8 +17,8 @@ classdef WebSocketServer < handle
     
     properties (SetAccess = private)
         Port % Server port
-        Secure % True if the server is a secure websocket server (wss)
-        Status % Server status
+        Secure = false % True if the server is a secure websocket server
+        Status = false % Server status
         Connections % Stores active connections' hash and address as well as their java websocket object
         ServerObj % Java-WebSocket server object
     end
@@ -47,17 +47,15 @@ classdef WebSocketServer < handle
             % Get current connections as a struct, listing HashCode, 
             % Address and Port, use the struct2table method on the returned
             % struct for a better display
-            N = size(obj.ServerObj.connections);
-            connsObj = obj.ServerObj.connections.toArray;
-            codes = num2cell(int32(zeros(N,1)));
-            adds = repmat(cellstr(''),N,1);
-            ports = codes;
+            connArr = obj.ServerObj.connections.toArray;
+            N = size(connArr,1);
+            conns = cell(N,3);
             for n = 1:N
-                codes{n} = int32(connsObj(n).hashCode());
-                adds{n} = char(connsObj(n).getRemoteSocketAddress.getHostName());
-                ports{n} = int32(connsObj(n).getRemoteSocketAddress.getPort());
+                conns{n,1} = int32(connArr(n).hashCode());
+                conns{n,2} = char(connArr(n).getRemoteSocketAddress.getHostName());
+                conns{n,3} = int32(connArr(n).getRemoteSocketAddress.getPort());
             end
-            conns = struct('HashCode',codes,'Address',adds,'Port',ports);
+            conns = cell2struct(conns,{'HashCode','Address','Port'},2);
         end
         
         function start(obj)
@@ -72,11 +70,11 @@ classdef WebSocketServer < handle
                 obj.ServerObj = handle(MatlabWebSocketServer(obj.Port),'CallbackProperties');
             end
             % Set callbacks
-            set(obj.ServerObj,'OpenCallback',@(~,e)obj.openCallback(e));
-            set(obj.ServerObj,'TextMessageCallback',@(~,e)obj.textMessageCallback(e));
-            set(obj.ServerObj,'BinaryMessageCallback',@(~,e)obj.binaryMessageCallback(e));
-            set(obj.ServerObj,'ErrorCallback',@(~,e)obj.errorCallback(e));
-            set(obj.ServerObj,'CloseCallback',@(~,e)obj.closeCallback(e));
+            set(obj.ServerObj,'OpenCallback',@obj.openCallback);
+            set(obj.ServerObj,'TextMessageCallback',@obj.textMessageCallback);
+            set(obj.ServerObj,'BinaryMessageCallback',@obj.binaryMessageCallback);
+            set(obj.ServerObj,'ErrorCallback',@obj.errorCallback);
+            set(obj.ServerObj,'CloseCallback',@obj.closeCallback);
             % Start the server
             obj.ServerObj.start();
             obj.Status = true;
@@ -115,7 +113,7 @@ classdef WebSocketServer < handle
             % Directly send a message to a particular client, as identified
             % by its HashCode
             if ~obj.Status; error('The server is not running!'); end
-            if ~isa(message,'char') && ~isa(message,'int8');
+            if ~isa(message,'char') && ~isa(message,'int8')
                 error('You can only send character arrays or int8 arrays!');
             end
             try
@@ -128,7 +126,7 @@ classdef WebSocketServer < handle
         function sendToAll(obj,message)
             % Send a message to all connected clients
             if ~obj.Status; error('The server is not running!'); end
-            if ~isa(message,'char') && ~isa(message,'int8');
+            if ~isa(message,'char') && ~isa(message,'int8')
                 error('You can only send character arrays or int8 arrays!');
             end
             obj.ServerObj.sendToAll(message);
@@ -164,27 +162,27 @@ classdef WebSocketServer < handle
     % Private methods triggered by the callbacks defined above. This is
     % where the reactive behaviour of the server is defined.
     methods (Access = private)
-        function openCallback(obj,e)
+        function openCallback(obj,~,e)
             % Define behavior in an onOpen method of a subclass
             obj.onOpen(WebSocketConnection(e.conn),char(e.message));
         end
         
-        function textMessageCallback(obj,e)
+        function textMessageCallback(obj,~,e)
             % Define behavior in an onTextMessage method of a subclass
             obj.onTextMessage(WebSocketConnection(e.conn),char(e.message));
         end
         
-        function binaryMessageCallback(obj,e)
+        function binaryMessageCallback(obj,~,e)
             % Define behavior in an onBinaryMessage method of a subclass
             obj.onBinaryMessage(WebSocketConnection(e.conn),e.blob.array);
         end
         
-        function errorCallback(obj,e)
+        function errorCallback(obj,~,e)
             % Define behavior in an onError method of a subclass
             obj.onError(WebSocketConnection(e.conn),char(e.message));
         end
         
-        function closeCallback(obj,e)
+        function closeCallback(obj,~,e)
             % Define behavior in an onClose method of a subclass
             obj.onClose(WebSocketConnection(e.conn),char(e.message));
         end

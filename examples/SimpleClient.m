@@ -13,7 +13,7 @@ classdef SimpleClient < WebSocketClient
     end
     
     methods (Access = protected)
-        function onOpen(~,message,~)
+        function onOpen(obj,message)
             % This function simply displays the message received
             fprintf('%s\n',message);
         end

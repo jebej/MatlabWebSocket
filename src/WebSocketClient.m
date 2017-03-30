@@ -17,8 +17,8 @@ classdef WebSocketClient < handle
     
     properties (SetAccess = private)
         URI % The URI of the server
-        Secure
-        Status % Status of the connection, true if the connection is open
+        Secure = false % True if the connection is using WebSocketSecure
+        Status = false % Status of the connection, true if the connection is open
         ClientObj % Java-WebSocket client object
     end
     
@@ -65,11 +65,11 @@ classdef WebSocketClient < handle
                 obj.ClientObj = handle(MatlabWebSocketClient(uri),'CallbackProperties');
             end
             % Set callbacks
-            set(obj.ClientObj,'OpenCallback',@(~,e)obj.openCallback(e));
-            set(obj.ClientObj,'TextMessageCallback',@(~,e)obj.textMessageCallback(e));
-            set(obj.ClientObj,'BinaryMessageCallback',@(~,e)obj.binaryMessageCallback(e));
-            set(obj.ClientObj,'ErrorCallback',@(~,e)obj.errorCallback(e));
-            set(obj.ClientObj,'CloseCallback',@(~,e)obj.closeCallback(e));
+            set(obj.ClientObj,'OpenCallback',@obj.openCallback);
+            set(obj.ClientObj,'TextMessageCallback',@obj.textMessageCallback);
+            set(obj.ClientObj,'BinaryMessageCallback',@obj.binaryMessageCallback);
+            set(obj.ClientObj,'ErrorCallback',@obj.errorCallback);
+            set(obj.ClientObj,'CloseCallback',@obj.closeCallback);
             % Connect to the websocket server
             obj.ClientObj.connectBlocking();
         end
@@ -94,7 +94,7 @@ classdef WebSocketClient < handle
         function send(obj,message)
             % Send a message to the server
             if ~obj.Status; warning('Connection is closed!');return; end
-            if ~isa(message,'char') && ~isa(message,'int8');
+            if ~isa(message,'char') && ~isa(message,'int8')
                 error('You can only send character arrays or int8 arrays!');
             end
             obj.ClientObj.send(message);
@@ -112,27 +112,27 @@ classdef WebSocketClient < handle
     
     % Private methods triggered by the callbacks defined above.
     methods (Access = private)
-        function openCallback(obj,e)
+        function openCallback(obj,~,e)
             % Define behavior in an onOpen method of a subclass
             obj.onOpen(char(e.message));
         end
         
-        function textMessageCallback(obj,e)
+        function textMessageCallback(obj,~,e)
             % Define behavior in an onTextMessage method of a subclass
             obj.onTextMessage(char(e.message));
         end
         
-        function binaryMessageCallback(obj,e)
+        function binaryMessageCallback(obj,~,e)
             % Define behavior in an onBinaryMessage method of a subclass
             obj.onBinaryMessage(e.blob.array);
         end
         
-        function errorCallback(obj,e)
+        function errorCallback(obj,~,e)
             % Define behavior in an onError method of a subclass
             obj.onError(char(e.message));
         end
         
-        function closeCallback(obj,e)
+        function closeCallback(obj,~,e)
             % Define behavior in an onClose method of a subclass
             obj.onClose(char(e.message));
             % Delete java client object if needed
