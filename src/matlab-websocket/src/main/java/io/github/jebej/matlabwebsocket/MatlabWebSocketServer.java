@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.java_websocket.WebSocket;
@@ -24,9 +23,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
         String add = conn.getRemoteSocketAddress().getHostName() + ":" + conn.getRemoteSocketAddress().getPort();
         String openMessage = "Client " + conn.hashCode() + " at " + add + " opened a connection";
         MatlabEvent matlab_event = new MatlabEvent( this, conn, openMessage );
-        Iterator<MatlabListener> listeners = _listeners.iterator();
-        while (listeners.hasNext() ) {
-            ( (MatlabListener) listeners.next() ).Open( matlab_event );
+        for (MatlabListener _listener : _listeners) {
+            (_listener).Open(matlab_event);
         }
     }
 
@@ -34,9 +32,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage( WebSocket conn, String message ) {
         MatlabEvent matlab_event = new MatlabEvent( this, conn, message );
-        Iterator<MatlabListener> listeners = _listeners.iterator();
-        while (listeners.hasNext() ) {
-            ( (MatlabListener) listeners.next() ).TextMessage( matlab_event );
+        for (MatlabListener _listener : _listeners) {
+            (_listener).TextMessage(matlab_event);
         }
     }
 
@@ -44,9 +41,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage( WebSocket conn, ByteBuffer blob ) {
         MatlabEvent matlab_event = new MatlabEvent( this, conn, blob );
-        Iterator<MatlabListener> listeners = _listeners.iterator();
-        while (listeners.hasNext() ) {
-            ( (MatlabListener) listeners.next() ).BinaryMessage( matlab_event );
+        for (MatlabListener _listener : _listeners) {
+            (_listener).BinaryMessage(matlab_event);
         }
     }
 
@@ -54,9 +50,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
     @Override
     public void onError( WebSocket conn, Exception ex ) {
         MatlabEvent matlab_event = new MatlabEvent( this, conn, ex.getMessage() );
-        Iterator<MatlabListener> listeners = _listeners.iterator();
-        while (listeners.hasNext() ) {
-            ( (MatlabListener) listeners.next() ).Error( matlab_event );
+        for (MatlabListener _listener : _listeners) {
+            (_listener).Error(matlab_event);
         }
     }
 
@@ -66,13 +61,12 @@ public class MatlabWebSocketServer extends WebSocketServer {
         String add = conn.getRemoteSocketAddress().getHostName() + ":" + conn.getRemoteSocketAddress().getPort();
         String closeMessage = remote ? "Client " + conn.hashCode() + " at "+ add + " closed the connection" : "Closed connection to client " + conn.hashCode() + " at " + add;
         MatlabEvent matlab_event = new MatlabEvent( this, conn, closeMessage );
-        Iterator<MatlabListener> listeners = _listeners.iterator();
-        while (listeners.hasNext() ) {
-            ( (MatlabListener) listeners.next() ).Close( matlab_event );
+        for (MatlabListener _listener : _listeners) {
+            (_listener).Close(matlab_event);
         }
     }
 
-    // Retreive a connection by hashcode
+    // Retrieve a connection by hashcode
     public WebSocket getConnection( int hashCode ) {
 		Collection<WebSocket> conns = connections();
 		synchronized ( conns ) {
@@ -141,7 +135,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
 	}
 
     // Methods for handling MATLAB as a listener, automatically managed
-    private List<MatlabListener> _listeners = new ArrayList<MatlabListener>();
+    private final List<MatlabListener> _listeners = new ArrayList<MatlabListener>();
     public synchronized void addMatlabListener( MatlabListener lis ) {
         _listeners.add( lis );
     }

@@ -11,37 +11,43 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.java_websocket.WebSocketImpl;
-import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
 
 public class MatlabWebSocketSSLClient extends MatlabWebSocketClient {
     // The constructor creates a new SSL WebSocketServer with the wildcard IP,
     // accepting all connections on the specified port
     public MatlabWebSocketSSLClient( URI serverURI, String keystore, String storePassword, String keyPassword ) throws Exception {
         super( serverURI );
-
-        WebSocketImpl.DEBUG = true;
+        String STORETYPE = "JKS";
+        //WebSocketImpl.DEBUG = true;
 
         // Load up the key store
-        String STORETYPE = "JKS";
-        String KEYSTORE = keystore;
-        String STOREPASSWORD = storePassword;
-        String KEYPASSWORD = keyPassword;
-
         KeyStore ks = KeyStore.getInstance( STORETYPE );
-        File kf = new File( KEYSTORE );
-        ks.load( new FileInputStream( kf ), STOREPASSWORD.toCharArray() );
-
+        File kf = new File( keystore );
+        ks.load( new FileInputStream( kf ), storePassword.toCharArray() );
+        // Initialize KMF and TMF
         KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509" );
-        kmf.init( ks, KEYPASSWORD.toCharArray() );
+        kmf.init( ks, keyPassword.toCharArray() );
         TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
         tmf.init( ks );
-
+        // Initialize SSLContext
         SSLContext sslContext = null;
         sslContext = SSLContext.getInstance( "TLS" );
         sslContext.init( kmf.getKeyManagers(), tmf.getTrustManagers(), null );
-
         SSLSocketFactory factory = sslContext.getSocketFactory();
+        // Apply SSL context to client
+        this.setSocket( factory.createSocket() );
+    }
 
+    public MatlabWebSocketSSLClient( URI serverURI ) throws Exception {
+        super( serverURI );
+        //WebSocketImpl.DEBUG = true;
+
+        // Initialize SSLContext with java's default key and trust store
+        SSLContext sslContext = null;
+        sslContext = SSLContext.getInstance( "TLS" );
+        sslContext.init( null, null, null );
+        SSLSocketFactory factory = sslContext.getSocketFactory();
+        // Apply SSL context to client
         this.setSocket( factory.createSocket() );
     }
 }

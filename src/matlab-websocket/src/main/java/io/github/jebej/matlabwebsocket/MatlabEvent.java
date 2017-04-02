@@ -1,7 +1,7 @@
 package io.github.jebej.matlabwebsocket;
 
 import java.nio.ByteBuffer;
-import java.util.Set;
+
 import org.java_websocket.WebSocket;
 
 // Object given to MATLAB when an event occur. The "this.something" assignments

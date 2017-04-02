@@ -16,28 +16,23 @@ public class MatlabWebSocketSSLServer extends MatlabWebSocketServer {
     // accepting all connections on the specified port
     public MatlabWebSocketSSLServer( int port, String keystore, String storePassword, String keyPassword ) throws Exception {
         super( port );
-
-        WebSocketImpl.DEBUG = true;
+        String STORETYPE = "JKS";
+        //WebSocketImpl.DEBUG = false;
 
         // Load up the key store
-        String STORETYPE = "JKS";
-        String KEYSTORE = keystore;
-        String STOREPASSWORD = storePassword;
-        String KEYPASSWORD = keyPassword;
-
         KeyStore ks = KeyStore.getInstance( STORETYPE );
-        File kf = new File( KEYSTORE );
-        ks.load( new FileInputStream( kf ), STOREPASSWORD.toCharArray() );
-
+        File kf = new File( keystore );
+        ks.load( new FileInputStream( kf ), storePassword.toCharArray() );
+        // Initialize KMF and TMF
         KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509" );
-        kmf.init( ks, KEYPASSWORD.toCharArray() );
+        kmf.init( ks, keyPassword.toCharArray() );
         TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
         tmf.init( ks );
-
+        // Initialize SSLContext
         SSLContext sslContext = null;
         sslContext = SSLContext.getInstance( "TLS" );
         sslContext.init( kmf.getKeyManagers(), tmf.getTrustManagers(), null );
-
+        // Apply SSL context to server
         this.setWebSocketFactory( new DefaultSSLWebSocketServerFactory( sslContext ) );
     }
 }

@@ -1,36 +1,38 @@
 MatlabWebSocket
 ===============
 
-MatlabWebSocket is a simple library consisting of a websocket server and client for Matlab built on [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket), a java implementation of the websocket protocol by Nathan Rajlich. It currently does support encryption, but there appears to be a bug that make the server crash once a client disconnects. This bug might not exist on Linux/macOS.
+MatlabWebSocket is a simple library consisting of a websocket server and client for MATLAB  built on [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket), a java implementation of the websocket protocol. Encryption is supported with self-signed certificates made with the java keytool.
 
-The non-secure server and client work fine, although there is a bug on Windows which prevents servers from being restarted on the same port. The workaround is to restart MATLAB, or change port.
-
-Installation
+Installation and Uninstallation
 ------------
-The required java library is a jar file located in the `/jar/` folder. It must be placed on the static java class path in Matlab. See the [Matlab Documentation](http://www.mathworks.com/help/matlab/matlab_external/bringing-java-classes-and-methods-into-matlab-workspace.html).
+First, download the latest release on GitHub or MATLAB Central and extract to contents where you want.
 
-You must also add the `/src/` folder to the Matlab path.
+The required java library is a jar file located in the `/jar/` folder. It must be placed on the static java class path in MATLAB . See the [MATLAB  Documentation](http://www.mathworks.com/help/matlab/matlab_external/static-path.html). Note that after adding the jar file to the java class path, MATLAB will need to be restarted.
+
+You must now add the `/src/` folder to the MATLAB  path. If you want to run the examples, add the `/examples/` folder as well.
+
+Simply undo these operations to uninstall MatlabWebSocket.
 
 Usage
 ------------
 
-The `WebSocketServer.m` file is an abstract Matlab class. The behaviour of the server must therefore be defined by creating a subclass that implements the following methods:
+The `WebSocketServer.m` file is an abstract MATLAB  class. The behaviour of the server must therefore be defined by creating a subclass that implements the following methods:
 
 ```matlab
-        onOpen(obj,conn,message)
-        onTextMessage(obj,conn,message)
-        onBinaryMessage(obj,conn,message)
-        onError(obj,conn,message)
-        onClose(obj,conn,message)
+onOpen(obj,conn,message)
+onTextMessage(obj,conn,message)
+onBinaryMessage(obj,conn,message)
+onError(obj,conn,message)
+onClose(obj,conn,message)
 ```
 
 `obj` is the object instance of the subclass, it is implicitly passed by MATLAB (see the object-oriented programming documentation of MATLAB).
 
 `message` is the message received by the server.
 
-`conn` is a WebSocketConnection object representing the client connection that cause the event. For example, if a message is received, the `conn` object will represent the client that sent this message.
+`conn` is a WebSocketConnection object representing the client connection that caused the event. For example, if a message is received, the `conn` object will represent the client that sent this message. You can send messages to that client through this object.
 
-The `WebSocketCLient.m` is very similar to the server, except that no `conn` object is passed to the `onSomething` methods.
+The `WebSocketClient.m` class is very similar to the server, except that no `conn` object is passed to the `onSomething` methods.
 
 The server supports a variety of methods to help talk to clients, look in the MATLAB class file to see what methods are available.
 
@@ -40,7 +42,7 @@ Example
 ------
 The example is an echo server, it returns to the client whatever was received.
 
-Run the echo server by making sure that the file is on the MATLAB path and executing:
+Run the echo server by making sure that the file is on the MATLAB path and executing
 ```matlab
 server = EchoServer(30000)
 ```
@@ -64,7 +66,7 @@ clientCode = server.Connections(1).HashCode
 server.sendTo(clientCode,'hi, this is the server!')
 ```
 
-To close the server, go back to Matlab and type:
+To close the server, type:
 ```matlab
 stop(server); % or server.stop()
 clear server;

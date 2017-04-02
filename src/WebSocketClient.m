@@ -23,6 +23,7 @@ classdef WebSocketClient < handle
     end
     
     properties (Access = private)
+        UseKeyStore = false
         KeyStore % Location of the keystore
         StorePassword % Keystore password
         KeyPassword % Key password
@@ -33,8 +34,9 @@ classdef WebSocketClient < handle
             % Constructor, create a client to connect to the deisgnated
             % server, the URI must be of the form 'ws://localhost:30000'
             obj.URI = URI;
+            if any(regexpi(URI,'wss')); obj.Secure = true; end 
             if nargin>1
-                obj.Secure = true;
+                obj.UseKeyStore = true;
                 obj.KeyStore = keyStore;
                 obj.StorePassword = storePassword;
                 obj.KeyPassword = keyPassword;
@@ -57,7 +59,10 @@ classdef WebSocketClient < handle
             % Create the java client object in with specified URI
             if obj.Status; warning('Connection is already open!');return; end
             uri = handle(java.net.URI(obj.URI));
-            if obj.Secure
+            if obj.Secure && ~obj.UseKeyStore
+                import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLClient;
+                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri),'CallbackProperties');
+            elseif obj.Secure && obj.UseKeyStore
                 import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLClient;
                 obj.ClientObj = handle(MatlabWebSocketSSLClient(uri,obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
             else
