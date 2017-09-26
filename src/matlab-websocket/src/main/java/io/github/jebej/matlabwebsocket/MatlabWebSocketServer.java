@@ -17,6 +17,12 @@ public class MatlabWebSocketServer extends WebSocketServer {
         super( new InetSocketAddress( port ) );
     }
 
+    // Server start
+    @Override
+	public void onStart() {
+		//System.out.println( "Server started!" );
+	}
+
     // Method handler when a new connection has been opened
     @Override
     public void onOpen( WebSocket conn, ClientHandshake handshake ) {
