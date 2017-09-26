@@ -26,7 +26,7 @@ classdef SimpleClient < WebSocketClient
         function onBinaryMessage(obj,bytearray)
             % This function simply displays the message received
             fprintf('Binary message received:\n');
-            display(size(bytearray));
+            fprintf('Array length: %d\n',length(bytearray));
         end
         
         function onError(obj,message)

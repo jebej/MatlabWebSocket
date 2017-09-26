@@ -3,13 +3,13 @@ function runtests( TEST_SSL )
 %   Detailed explanation goes here
 if nargin==0; TEST_SSL = 0; end
 
-PORT   = randi([49152 65535],1);
+PROTOCOL = 'ws';
+PORT = randi([49152 65535],1);
+STORE  = fullfile(fileparts(which('WebSocketServer')),'matlab-websocket','keystore.jks');
 STOREPASSWORD = 'storepassword';
 KEYPASSWORD = 'keypassword';
-
-if TEST_SSL; PROTOCOL = 'wss'; else, PROTOCOL = 'ws'; end
-STORE  = fullfile(fileparts(which('WebSocketServer')),'matlab-websocket','keystore.jks');
-URI    = sprintf('%s://localhost:%d',PROTOCOL,PORT);
+if TEST_SSL; PROTOCOL = 'wss'; end
+URI = sprintf('%s://localhost:%d',PROTOCOL,PORT);
 
 try
     % First, create a server
