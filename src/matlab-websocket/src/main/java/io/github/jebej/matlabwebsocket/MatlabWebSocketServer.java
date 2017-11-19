@@ -34,7 +34,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
         }
     }
 
-    // Method handler when a text message has been received from the client
+    // Method handler when a text message has been received by the server
     @Override
     public void onMessage( WebSocket conn, String message ) {
         MatlabEvent matlab_event = new MatlabEvent( this, conn, message );
@@ -43,7 +43,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
         }
     }
 
-    // Method handler when a binary message has been received from the client
+    // Method handler when a binary message has been received by the server
     @Override
     public void onMessage( WebSocket conn, ByteBuffer blob ) {
         MatlabEvent matlab_event = new MatlabEvent( this, conn, blob );

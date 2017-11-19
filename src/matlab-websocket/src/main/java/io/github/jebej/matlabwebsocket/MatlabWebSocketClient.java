@@ -33,7 +33,7 @@ public class MatlabWebSocketClient extends WebSocketClient {
         }
     }
 
-    // Method handler when a byte message has been received from the client
+    // Method handler when a byte message has been received by the client
     @Override
     public void onMessage( ByteBuffer blob ) {
         MatlabEvent matlab_event = new MatlabEvent( this, blob );

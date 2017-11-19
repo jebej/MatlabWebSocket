@@ -47,7 +47,7 @@ When you are done, do not forget to `delete` the clients and/or servers.
 See the `EchoServer.m` and `SimpleClient.m` files in the `examples` folder for an implementation example. A good resource on classes is the [MATLAB object-oriented documentation](http://www.mathworks.com/help/matlab/object-oriented-programming.html).
 
 Example
-------
+------------
 The example is an echo server, it returns to the client whatever was received.
 
 Run the echo server by making sure that the file is on the MATLAB path and executing
@@ -91,7 +91,7 @@ clear server;
 ```
 
 SSL / WebSocket Secure (wss)
--------
+------------
 
 To enable SSL, you must first have a certificate. A self-signed key store can be generated with the java `keytool`, but you should always use a valid certificate in production. From there, open the server by passing the location of the store, the store password, and the key password. With the EchoServer, for example:
 
@@ -119,14 +119,21 @@ Message received:
 hi, this communication is secured!
 ```
 
+Building the Java JAR
+------------
+
+To build the `jar` file yourself, it is recommended to use Apache Maven. Maven will automatically take care of downloading Java-WebSocket and neatly package everything into a single file (an "uber jar").
+
+Once the `mvn` command is on your path, simply `cd` to the `matlab-websocket` folder and execute `mvn package`.
+
 Acknowledgments
--------
+------------
 
 This work was inspired by a websocket client MATLAB implementation:  [matlab-websockets](https://github.com/mingot/matlab-websockets).
 
 It relies on the [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) library.
 
 License
--------
+------------
 
 The code in this repository is licensed under the MIT license. See the `LICENSE` file for details.
