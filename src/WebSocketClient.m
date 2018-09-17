@@ -31,15 +31,24 @@ classdef WebSocketClient < handle
     
     methods
         function obj = WebSocketClient(URI,keyStore,storePassword,keyPassword)
-            % Constructor, create a client to connect to the deisgnated
-            % server, the URI must be of the form 'ws://localhost:30000'
-            obj.URI = URI;
-            if any(regexpi(URI,'wss')); obj.Secure = true; end 
-            if nargin>1
+            % WebSocketClient Constructor
+            % Creates a java client to connect to the designated server.
+            % The URI must be of the form 'ws://some.server.org:30000'.
+            obj.URI = lower(URI);
+            if strfind(obj.URI,'wss')
+                obj.Secure = true;
+            end
+            if obj.Secure && nargin == 4
                 obj.UseKeyStore = true;
                 obj.KeyStore = keyStore;
                 obj.StorePassword = storePassword;
                 obj.KeyPassword = keyPassword;
+            elseif obj.Secure && nargin ~= 1
+                error('Invalid number of arguments for secure connection with keystore!');
+            elseif ~obj.Secure && nargin > 1
+                warning(['You are passing a keystore, but the given '...
+                    'server URI does not start with "wss". '...
+                    'The connection will not be secure.']);
             end
             % Connect the client to the server
             obj.open();
@@ -58,15 +67,14 @@ classdef WebSocketClient < handle
             % Open the connection to the server
             % Create the java client object in with specified URI
             if obj.Status; warning('Connection is already open!');return; end
+            import io.github.jebej.matlabwebsocket.*
             uri = handle(java.net.URI(obj.URI));
             if obj.Secure && ~obj.UseKeyStore
-                import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLClient;
                 obj.ClientObj = handle(MatlabWebSocketSSLClient(uri),'CallbackProperties');
             elseif obj.Secure && obj.UseKeyStore
-                import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLClient;
-                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri,obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
+                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri,...
+                    obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
             else
-                import io.github.jebej.matlabwebsocket.MatlabWebSocketClient;
                 obj.ClientObj = handle(MatlabWebSocketClient(uri),'CallbackProperties');
             end
             % Set callbacks

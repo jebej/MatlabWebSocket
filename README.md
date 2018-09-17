@@ -5,24 +5,33 @@ MatlabWebSocket is a simple library consisting of a websocket server and client 
 
 Installation and Uninstallation
 ------------
-First, download the latest release on GitHub or MATLAB Central and extract to contents where you want.
 
-The required java library is a `jar` file located in the `/jar/` folder. It must be placed on the static java class path in MATLAB. For example, if the location of the jar file is `C:\MatlabWebSocket\jar\matlab-websocket-1.3.jar`, then open the static class path file with the following command:
+*IMPORTANT*: you must make sure to install the java library to the static class path by following the instructions below. MatlabWebSocket will not work otherwise!
+
+First, download the latest release on GitHub or MATLAB Central and extract the contents where you want.
+
+The required java library is a `jar` file located in the `/jar/` folder. It must be placed on the static java class path in MATLAB. For example, if the location of the jar file is `C:\MatlabWebSocket\jar\matlab-websocket-*.*.jar`, then open the static class path file with the following command:
 ```matlab
 edit(fullfile(prefdir,'javaclasspath.txt'))
 ```
-and add the line `C:\MatlabWebSocket\jar\matlab-websocket-1.3.jar` to it. Make sure that there are no other lines with a `matlab-websocket-*` jar.
+and add the line `C:\MatlabWebSocket\jar\matlab-websocket-*.*.jar` to it. Make sure that there are no other lines with a `matlab-websocket-*` entry.
 
-See the [MATLAB  Documentation](http://www.mathworks.com/help/matlab/matlab_external/static-path.html) for more information on the static java class path. Note that after adding the jar file to the java class path, MATLAB will need to be restarted.
+Make sure to replace the stars `matlab-websocket-*.*.jar` with the correct version number that you downloaded.
+
+After having done this, restart MATLAB and check that the line was read by MATLAB properly by running the `javaclasspath` command. The line should appear at the bottom of the list, before the `DYNAMIC JAVA PATH` entries. Note that seeing the entry here does not mean that MATLAB necessarily found the jar file properly. You must make sure that the actual `jar` file is indeed at this location.
 
 You must now add the `/src/` folder to the MATLAB  path. If you want to run the examples, add the `/examples/` folder as well.
 
 Simply undo these operations to uninstall MatlabWebSocket.
 
+See the [MATLAB  Documentation](http://www.mathworks.com/help/matlab/matlab_external/static-path.html) for more information on the static java class path.
+
 Usage
 ------------
 
-The `WebSocketServer.m` file is an abstract MATLAB  class. The behaviour of the server must therefore be defined by creating a subclass that implements the following methods:
+To implement a WebSocket server or client, a subclass of either `WebSocketServer` or `WebSocketClient` must be defined. For more details (see the [object-oriented programming documentation of MATLAB](http://www.mathworks.com/help/matlab/object-oriented-programming.html)).
+
+The `WebSocketServer.m` file is an abstract MATLAB class. The behavior of the server must therefore be defined by creating a subclass that implements the following methods:
 
 ```matlab
 onOpen(obj,conn,message)
@@ -50,7 +59,7 @@ Example
 ------------
 The example is an echo server, it returns to the client whatever was received.
 
-Run the echo server by making sure that the file is on the MATLAB path and executing
+Run the echo server by making sure that the example file `EchoServer.m` is on the MATLAB path and executing
 ```matlab
 server = EchoServer(30000)
 ```

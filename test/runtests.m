@@ -1,6 +1,5 @@
 function runtests( TEST_SSL )
-%RUNTESTS Summary of this function goes here
-%   Detailed explanation goes here
+%RUNTESTS These tests need the example folder to be on the path to work
 if nargin==0; TEST_SSL = 0; end
 
 PROTOCOL = 'ws';
@@ -45,21 +44,21 @@ try
     
     % Large file transfer test
     A = randi([-128 127],3*10^7,1,'int8');
-    c.send(A); pause(0.3);
+    c.send(A); pause(1);
     
     % Connect many clients
     N = 100;
     clients = cell(N,1);
     for i=1:N; clients{i} = SimpleClient(URI,STORE,STOREPASSWORD,KEYPASSWORD); end
-    pause(0.1);
+    pause(1);
     
     % Send a message from each client
     for i=1:N; clients{i}.send(A(i*(1:10^5))); end
-    pause(0.5);
+    pause(1);
     
     % Disconnect all the clients
     for i=1:N; delete(clients{i}); end
-    pause(0.1);
+    pause(1);
     
 catch err
     delete(c);

@@ -33,40 +33,27 @@ classdef WebSocketServer < handle
         function obj = WebSocketServer(port,keyStore,storePassword,keyPassword)
             % Constructor
             obj.Port = port;
-            if nargin>1
+            if nargin == 4
                 obj.Secure = true;
                 obj.KeyStore = keyStore;
                 obj.StorePassword = storePassword;
                 obj.KeyPassword = keyPassword;
+            elseif nargin ~= 1
+                error('Invalid number of arguments for secure connection with keystore!');
             end
             % Start server
             obj.start();
         end
         
-        function conns = get.Connections(obj)
-            % Get current connections as a struct, listing HashCode, 
-            % Address and Port, use the struct2table method on the returned
-            % struct for a better display
-            connArr = obj.ServerObj.connections.toArray;
-            N = size(connArr,1);
-            conns = cell(N,3);
-            for n = 1:N
-                conns{n,1} = int32(connArr(n).hashCode());
-                conns{n,2} = char(connArr(n).getRemoteSocketAddress.getHostName());
-                conns{n,3} = int32(connArr(n).getRemoteSocketAddress.getPort());
-            end
-            conns = cell2struct(conns,{'HashCode','Address','Port'},2);
-        end
-        
         function start(obj)
             % Start the WebSocket server
             if obj.Status; error('The server is already running'); end
+            import io.github.jebej.matlabwebsocket.*
             % Create the java server object in with specified port
             if obj.Secure
-                import io.github.jebej.matlabwebsocket.MatlabWebSocketSSLServer;
-                obj.ServerObj = handle(MatlabWebSocketSSLServer(obj.Port,obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
+                obj.ServerObj = handle(MatlabWebSocketSSLServer(obj.Port,...
+                    obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
             else
-                import io.github.jebej.matlabwebsocket.MatlabWebSocketServer;
                 obj.ServerObj = handle(MatlabWebSocketServer(obj.Port),'CallbackProperties');
             end
             % Set callbacks
@@ -83,7 +70,7 @@ classdef WebSocketServer < handle
         function stop(obj,timeout)
             % Stop the server with a timeout to close connections
             if ~obj.Status; error('The server is not running!'); end
-            if nargin<2; timeout=5000; end;
+            if nargin<2; timeout=5000; end
             obj.ServerObj.stop(int32(timeout));
             % Explicitely delete the server object
             delete(obj.ServerObj); obj.ServerObj=[];
@@ -96,6 +83,21 @@ classdef WebSocketServer < handle
                 % Stop the server if it is running
                 obj.stop();
             end
+        end
+        
+        function conns = get.Connections(obj)
+            % Get current connections as a struct, listing HashCode, 
+            % Address and Port, use the struct2table method on the returned
+            % struct for a better display
+            connArr = obj.ServerObj.connections.toArray;
+            N = size(connArr,1);
+            conns = cell(N,3);
+            for n = 1:N
+                conns{n,1} = int32(connArr(n).hashCode());
+                conns{n,2} = char(connArr(n).getRemoteSocketAddress.getHostName());
+                conns{n,3} = int32(connArr(n).getRemoteSocketAddress.getPort());
+            end
+            conns = cell2struct(conns,{'HashCode','Address','Port'},2);
         end
         
         function conn = getConnection(obj,hashCode)

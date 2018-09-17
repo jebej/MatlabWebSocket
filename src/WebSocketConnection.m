@@ -64,7 +64,7 @@ classdef WebSocketConnection < handle
         function send(obj,message)
             % Send a message to that WebSocket client.
             if ~obj.Status; error('Connection is closed!'); end
-            if ~isa(message,'char') && ~isa(message,'int8');
+            if ~isa(message,'char') && ~isa(message,'int8')
                 error('You can only send character arrays or int8 arrays!');
             end
             obj.WebSocketObj.send(message);
