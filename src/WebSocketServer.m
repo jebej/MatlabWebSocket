@@ -115,8 +115,8 @@ classdef WebSocketServer < handle
             % Directly send a message to a particular client, as identified
             % by its HashCode
             if ~obj.Status; error('The server is not running!'); end
-            if ~isa(message,'char') && ~isa(message,'int8')
-                error('You can only send character arrays or int8 arrays!');
+            if ~ischar(message) && ~isa(message,'int8') && ~isa(message,'uint8')
+                error('You can only send character arrays or byte arrays!');
             end
             try
                 obj.ServerObj.sendTo(hashCode,message);
@@ -128,8 +128,8 @@ classdef WebSocketServer < handle
         function sendToAll(obj,message)
             % Send a message to all connected clients
             if ~obj.Status; error('The server is not running!'); end
-            if ~isa(message,'char') && ~isa(message,'int8')
-                error('You can only send character arrays or int8 arrays!');
+            if ~ischar(message) && ~isa(message,'int8') && ~isa(message,'uint8')
+                error('You can only send character arrays or byte arrays!');
             end
             obj.ServerObj.sendToAll(message);
         end
