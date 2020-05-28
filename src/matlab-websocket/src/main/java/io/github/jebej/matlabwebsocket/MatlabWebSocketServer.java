@@ -9,6 +9,8 @@ import java.util.List;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.java_websocket.framing.PongFrame;
+import org.java_websocket.enums.Opcode;
 
 public class MatlabWebSocketServer extends WebSocketServer {
     // The constructor creates a new WebSocketServer with the wildcard IP,
@@ -76,9 +78,9 @@ public class MatlabWebSocketServer extends WebSocketServer {
     public WebSocket getConnection( int hashCode ) {
 		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
-			for( WebSocket c : conns ) {
-				if (c.hashCode() == hashCode) {
-                    return c;
+			for ( WebSocket conn : conns ) {
+				if (conn.hashCode() == hashCode) {
+                    return conn;
                 }
 			}
 		}
@@ -92,7 +94,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
 
     // Send binary message to a connection identified by a hashcode
     public void sendTo( int hashCode, ByteBuffer blob ) {
-		getConnection( hashCode ).send( blob );
+		WebSocket conn = getConnection( hashCode );
+		sendSplit( conn, blob );
 	}
 
     // Send binary message to a connection identified by a hashcode
@@ -104,8 +107,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
     public void sendToAll( String message ) {
 		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
-			for( WebSocket c : conns ) {
-				c.send( message );
+			for( WebSocket conn : conns ) {
+				conn.send( message );
 			}
 		}
 	}
@@ -114,8 +117,8 @@ public class MatlabWebSocketServer extends WebSocketServer {
     public void sendToAll( ByteBuffer blob ) {
 		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
-			for( WebSocket c : conns ) {
-				c.send( blob );
+			for( WebSocket conn : conns ) {
+				sendSplit( conn, blob );
 			}
 		}
 	}
@@ -123,6 +126,28 @@ public class MatlabWebSocketServer extends WebSocketServer {
     // Send binary message to all clients
     public void sendToAll( byte[] bytes ) {
         sendToAll( ByteBuffer.wrap( bytes ) );
+	}
+	
+	// Method to send large messages in fragments if needed
+	public void sendSplit( WebSocket conn, ByteBuffer blob ) {
+		int FRAG_SIZE = 5*1024*1024; // 5MB
+		int blobSize = blob.capacity();
+		// Only send as fragments if message is larger than FRAG_SIZE
+		if ( blobSize <= FRAG_SIZE ) {
+			conn.send( blob );
+		} else {
+			int numFrags = (blobSize + FRAG_SIZE - 1)/FRAG_SIZE;
+			blob.rewind();
+			for ( int i = 0; i<numFrags; i++ ) {
+				blob.position( i*FRAG_SIZE );
+				blob.limit( Math.min( (i+1)*FRAG_SIZE, blobSize ) );
+				conn.sendFragmentedFrame( Opcode.BINARY, blob, (i+1)==numFrags );
+				// Send a ping AND an unpromted pong to keep connection alive
+				conn.sendPing();
+				conn.sendFrame( new PongFrame() );
+			}
+			assert( blob.position() == blobSize );
+		}
 	}
 
     // Close connection identified by a hashcode

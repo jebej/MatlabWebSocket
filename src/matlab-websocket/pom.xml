@@ -5,7 +5,7 @@
     <groupId>io.github.jebej.matlabwebsocket</groupId>
     <artifactId>matlab-websocket</artifactId>
     <packaging>jar</packaging>
-    <version>1.4</version>
+    <version>1.5</version>
 
     <name>matlab-websocket</name>
     <url>https://github.com/jebej/MatlabWebSocket</url>
