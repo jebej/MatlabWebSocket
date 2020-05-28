@@ -74,7 +74,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
 
     // Retrieve a connection by hashcode
     public WebSocket getConnection( int hashCode ) {
-		Collection<WebSocket> conns = connections();
+		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
 			for( WebSocket c : conns ) {
 				if (c.hashCode() == hashCode) {
@@ -102,7 +102,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
 
     // Send text message to all clients
     public void sendToAll( String message ) {
-		Collection<WebSocket> conns = connections();
+		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
 			for( WebSocket c : conns ) {
 				c.send( message );
@@ -112,7 +112,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
 
     // Send binary message to all clients
     public void sendToAll( ByteBuffer blob ) {
-		Collection<WebSocket> conns = connections();
+		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
 			for( WebSocket c : conns ) {
 				c.send( blob );
@@ -132,7 +132,7 @@ public class MatlabWebSocketServer extends WebSocketServer {
 
     // Close all connections
     public void closeAll() {
-		Collection<WebSocket> conns = connections();
+		Collection<WebSocket> conns = getConnections();
 		synchronized ( conns ) {
 			for( WebSocket c : conns ) {
 				c.close();
