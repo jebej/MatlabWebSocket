@@ -4,14 +4,15 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class MatlabWebSocketClient extends WebSocketClient {
     // This open a websocket connection as specified by RFC6455
-    public MatlabWebSocketClient( URI serverURI ) {
-        super( serverURI );
+    public MatlabWebSocketClient( URI serverURI, Map<String,String> httpHeaders ) {
+        super( serverURI, httpHeaders );
     }
 
     // This function gets executed when the connection is opened
