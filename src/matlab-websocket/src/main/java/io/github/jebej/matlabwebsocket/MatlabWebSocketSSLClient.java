@@ -4,6 +4,7 @@ import java.net.URI;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.util.Map;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -15,8 +16,8 @@ import org.java_websocket.WebSocketImpl;
 public class MatlabWebSocketSSLClient extends MatlabWebSocketClient {
     // The constructor creates a new SSL WebSocketServer with the wildcard IP,
     // accepting all connections on the specified port
-    public MatlabWebSocketSSLClient( URI serverURI, String keystore, String storePassword, String keyPassword ) throws Exception {
-        super( serverURI );
+    public MatlabWebSocketSSLClient( URI serverURI, Map<String,String> httpHeaders, String keystore, String storePassword, String keyPassword ) throws Exception {
+        super( serverURI, httpHeaders );
         String STORETYPE = "JKS";
         //WebSocketImpl.DEBUG = true;
 
@@ -38,8 +39,8 @@ public class MatlabWebSocketSSLClient extends MatlabWebSocketClient {
         this.setSocket( factory.createSocket() );
     }
 
-    public MatlabWebSocketSSLClient( URI serverURI ) throws Exception {
-        super( serverURI );
+    public MatlabWebSocketSSLClient( URI serverURI, Map<String,String> httpHeaders ) throws Exception {
+        super( serverURI, httpHeaders );
         //WebSocketImpl.DEBUG = true;
 
         // Initialize SSLContext with java's default key and trust store

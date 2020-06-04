@@ -17,6 +17,7 @@ classdef WebSocketClient < handle
     
     properties (SetAccess = private)
         URI % The URI of the server
+        httpHeaders = containers.Map % Map of additional http headers
         Secure = false % True if the connection is using WebSocketSecure
         Status = false % Status of the connection, true if the connection is open
         ClientObj % Java-WebSocket client object
@@ -30,7 +31,7 @@ classdef WebSocketClient < handle
     end
     
     methods
-        function obj = WebSocketClient(URI,keyStore,storePassword,keyPassword)
+        function obj = WebSocketClient(URI,varargin)
             % WebSocketClient Constructor
             % Creates a java client to connect to the designated server.
             % The URI must be of the form 'ws://some.server.org:30000'.
@@ -38,14 +39,19 @@ classdef WebSocketClient < handle
             if strfind(obj.URI,'wss')
                 obj.Secure = true;
             end
-            if obj.Secure && nargin == 4
+            if nargin == 2
+                obj.httpHeaders = varargin{1};
+            elseif obj.Secure && (nargin == 4 || nargin == 5)
                 obj.UseKeyStore = true;
                 obj.KeyStore = keyStore;
                 obj.StorePassword = storePassword;
                 obj.KeyPassword = keyPassword;
-            elseif obj.Secure && nargin ~= 1
+                if nargin == 5
+                    obj.httpHeaders = httpHeaders;
+                end
+            elseif obj.Secure && nargin > 2
                 error('Invalid number of arguments for secure connection with keystore!');
-            elseif ~obj.Secure && nargin > 1
+            elseif ~obj.Secure && nargin > 2
                 warning(['You are passing a keystore, but the given '...
                     'server URI does not start with "wss". '...
                     'The connection will not be secure.']);
@@ -69,13 +75,17 @@ classdef WebSocketClient < handle
             if obj.Status; warning('Connection is already open!');return; end
             import io.github.jebej.matlabwebsocket.*
             uri = handle(java.net.URI(obj.URI));
+            headers = handle(java.util.HashMap());
+            for key = keys(obj.httpHeaders)
+                headers.put(key{1}, obj.httpHeaders(key{1}));
+            end            
             if obj.Secure && ~obj.UseKeyStore
-                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri),'CallbackProperties');
+                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri, headers),'CallbackProperties');
             elseif obj.Secure && obj.UseKeyStore
                 obj.ClientObj = handle(MatlabWebSocketSSLClient(uri,...
-                    obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
+                    obj.KeyStore,obj.StorePassword,obj.KeyPassword, headers),'CallbackProperties');
             else
-                obj.ClientObj = handle(MatlabWebSocketClient(uri),'CallbackProperties');
+                obj.ClientObj = handle(MatlabWebSocketClient(uri, headers),'CallbackProperties');
             end
             % Set callbacks
             set(obj.ClientObj,'OpenCallback',@obj.openCallback);
