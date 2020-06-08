@@ -17,7 +17,7 @@ classdef WebSocketClient < handle
     
     properties (SetAccess = private)
         URI % The URI of the server
-        httpHeaders = containers.Map % Map of additional http headers
+        HttpHeaders = {} % Cell array with additional http headers as key value pairs
         Secure = false % True if the connection is using WebSocketSecure
         Status = false % Status of the connection, true if the connection is open
         ClientObj % Java-WebSocket client object
@@ -34,20 +34,21 @@ classdef WebSocketClient < handle
         function obj = WebSocketClient(URI,varargin)
             % WebSocketClient Constructor
             % Creates a java client to connect to the designated server.
+            % Arguments: URI, keyStore, storePassword, keyPassword, httpHeaders
             % The URI must be of the form 'ws://some.server.org:30000'.
             obj.URI = lower(URI);
             if strfind(obj.URI,'wss')
                 obj.Secure = true;
             end
             if nargin == 2
-                obj.httpHeaders = varargin{1};
+                obj.HttpHeaders = varargin{1};
             elseif obj.Secure && (nargin == 4 || nargin == 5)
                 obj.UseKeyStore = true;
-                obj.KeyStore = keyStore;
-                obj.StorePassword = storePassword;
-                obj.KeyPassword = keyPassword;
+                obj.KeyStore = varargin{2};
+                obj.StorePassword = varargin{3};
+                obj.KeyPassword = varargin{4};
                 if nargin == 5
-                    obj.httpHeaders = httpHeaders;
+                    obj.HttpHeaders = varargin{5};
                 end
             elseif obj.Secure && nargin > 2
                 error('Invalid number of arguments for secure connection with keystore!');
@@ -76,9 +77,9 @@ classdef WebSocketClient < handle
             import io.github.jebej.matlabwebsocket.*
             uri = handle(java.net.URI(obj.URI));
             headers = handle(java.util.HashMap());
-            for key = keys(obj.httpHeaders)
-                headers.put(key{1}, obj.httpHeaders(key{1}));
-            end            
+            for i=1:2:length(obj.HttpHeaders)-1
+                headers.put(obj.HttpHeaders{i}, obj.HttpHeaders{i+1});
+            end
             if obj.Secure && ~obj.UseKeyStore
                 obj.ClientObj = handle(MatlabWebSocketSSLClient(uri, headers),'CallbackProperties');
             elseif obj.Secure && obj.UseKeyStore
