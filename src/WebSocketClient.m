@@ -17,13 +17,13 @@ classdef WebSocketClient < handle
     
     properties (SetAccess = private)
         URI % The URI of the server
-        HttpHeaders = {} % Cell array with additional http headers as key value pairs
         Secure = false % True if the connection is using WebSocketSecure
         Status = false % Status of the connection, true if the connection is open
         ClientObj % Java-WebSocket client object
     end
     
     properties (Access = private)
+        HttpHeaders = {} % Cell array of additional headers {'key1', 'value1',...}
         UseKeyStore = false
         KeyStore % Location of the keystore
         StorePassword % Keystore password
@@ -34,21 +34,22 @@ classdef WebSocketClient < handle
         function obj = WebSocketClient(URI,varargin)
             % WebSocketClient Constructor
             % Creates a java client to connect to the designated server.
-            % Arguments: URI, keyStore, storePassword, keyPassword, httpHeaders
-            % The URI must be of the form 'ws://some.server.org:30000'.
+            % Arguments: URI, [keyStore, storePassword, keyPassword], [httpHeaders]
+            % The URI must be of the form 'ws[s]://some.server.org:30000'.
             obj.URI = lower(URI);
             if strfind(obj.URI,'wss')
                 obj.Secure = true;
             end
+            % Parse optional arguments
             if nargin == 2
                 obj.HttpHeaders = varargin{1};
             elseif obj.Secure && (nargin == 4 || nargin == 5)
                 obj.UseKeyStore = true;
-                obj.KeyStore = varargin{2};
-                obj.StorePassword = varargin{3};
-                obj.KeyPassword = varargin{4};
+                obj.KeyStore = varargin{1};
+                obj.StorePassword = varargin{2};
+                obj.KeyPassword = varargin{3};
                 if nargin == 5
-                    obj.HttpHeaders = varargin{5};
+                    obj.HttpHeaders = varargin{4};
                 end
             elseif obj.Secure && nargin > 2
                 error('Invalid number of arguments for secure connection with keystore!');
@@ -56,6 +57,11 @@ classdef WebSocketClient < handle
                 warning(['You are passing a keystore, but the given '...
                     'server URI does not start with "wss". '...
                     'The connection will not be secure.']);
+            end
+            % Check headers are valid
+            if ~iscellstr(obj.HttpHeaders) || logical(mod(length(obj.HttpHeaders),2))
+                error(['Invalid HTTP header format! You must pass a cell array'...
+                    'of key/value pairs: {''key1'', ''value1'',...}']);
             end
             % Connect the client to the server
             obj.open();
@@ -77,14 +83,14 @@ classdef WebSocketClient < handle
             import io.github.jebej.matlabwebsocket.*
             uri = handle(java.net.URI(obj.URI));
             headers = handle(java.util.HashMap());
-            for i=1:2:length(obj.HttpHeaders)-1
+            for i = 1:2:length(obj.HttpHeaders)-1
                 headers.put(obj.HttpHeaders{i}, obj.HttpHeaders{i+1});
             end
             if obj.Secure && ~obj.UseKeyStore
                 obj.ClientObj = handle(MatlabWebSocketSSLClient(uri, headers),'CallbackProperties');
             elseif obj.Secure && obj.UseKeyStore
-                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri,...
-                    obj.KeyStore,obj.StorePassword,obj.KeyPassword, headers),'CallbackProperties');
+                obj.ClientObj = handle(MatlabWebSocketSSLClient(uri, headers,...
+                    obj.KeyStore,obj.StorePassword,obj.KeyPassword),'CallbackProperties');
             else
                 obj.ClientObj = handle(MatlabWebSocketClient(uri, headers),'CallbackProperties');
             end
