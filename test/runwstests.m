@@ -1,4 +1,4 @@
-function runtests( TEST_SSL )
+function runwstests( TEST_SSL )
 %RUNTESTS These tests need the example folder to be on the path to work
 if nargin==0; TEST_SSL = 0; end
 
